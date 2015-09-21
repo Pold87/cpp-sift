@@ -1,0 +1,83 @@
+# Define whether to cross-compile or not
+set(CrossCompileBebop FALSE)
+
+# Basic setup cmake
+cmake_minimum_required(VERSION 2.6)
+project(visual_odometry)
+
+# C++11 support
+add_definitions(-std=c++11)
+
+# 3rd party libraries
+add_subdirectory(3rdparty)
+include_directories(3rdparty)
+
+# Add visual_odometry library
+add_subdirectory(lib)
+include_directories(lib)
+
+
+if(NOT CrossCompileBebop)
+    # Compiler settings
+    if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+      # Show warnings
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+      # Debug mode
+      set(CMAKE_BUILD_TYPE "Debug")
+    endif()
+
+    # Add OpenCV libraray
+    find_package(OpenCV REQUIRED core imgproc highgui calib3d videostab)
+
+
+    ## Executables
+    # Simulation with webcam
+    add_executable(vo_sim vo_sim.cpp)
+    target_link_libraries(vo_sim ${OpenCV_LIBS} VisualOdometry)
+
+    # Threaded simulation with webcam
+    add_executable(vo_sim_threaded vo_sim_threaded.cpp)
+    target_link_libraries(vo_sim_threaded ${OpenCV_LIBS} VisualOdometry helper cjson serialib)
+
+    # Odroid implementation
+    add_executable(vo_odroid vo_odroid.cpp)
+    target_link_libraries(vo_odroid ${OpenCV_LIBS} VisualOdometry helper serialib cjson)
+
+    # Threaded odroid implementation
+    add_executable(vo_odroid_threaded vo_odroid_threaded.cpp)
+    target_link_libraries(vo_odroid_threaded ${OpenCV_LIBS} VisualOdometry helper cjson serialib)
+
+    # Threaded odroid implementation (also paparazzi communication)
+    add_executable(vo_odroid_threaded2 vo_odroid_threaded2.cpp)
+    target_link_libraries(vo_odroid_threaded2 ${OpenCV_LIBS} VisualOdometry helper cjson serialib)
+
+    # Add macbook executable (i.e., ardrone in the loop)
+    add_executable(vo_macbook vo_macbook.cpp)
+    target_link_libraries(vo_macbook ${OpenCV_LIBS} VisualOdometry helper serialib cjson)
+
+else()
+    # Set compiler
+    set(CMAKE_SYSTEM_NAME Linux)
+    set(CMAKE_C_COMPILER "arm-linux-gnueabi-gcc")
+    set(CMAKE_CXX_COMPILER "arm-linux-gnueabi-gcc")
+    set(BUILD_SHARED_LIBS "OFF")
+
+    # Add OpenCV libraray
+    add_subdirectory(/home/gerald/git/Imav2015/visual_odometry/cpp/3rdparty/opencv/include)
+    include_directories(/home/gerald/git/Imav2015/visual_odometry/cpp/3rdparty/opencv/include)
+
+    link_directories(/home/gerald/opencv-3.0.0/build/lib)
+    link_directories(/home/gerald/opencv-3.0.0/build/3rdparty/lib)
+
+
+    ## Executables
+    add_executable(vo_bebop vo_bebop.cpp)
+    #add_executable(vo_bebop vo_bebop.cpp lib/visualodometry.cpp lib/voinput.cpp lib/vostate.cpp lib/helper.cpp 3rdparty/serialib.cpp 3rdparty/cJSON.c)
+    #target_link_libraries(vo_bebop  libopencv_world.a libzlib.a)
+    #target_link_libraries(vo_bebop dl pthread)
+
+
+
+endif()
+
+
