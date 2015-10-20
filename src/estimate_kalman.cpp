@@ -32,22 +32,6 @@ const float match_ratio = 0.8f;   // Nearest neighbor matching ratio
 using namespace std;
 using namespace std::chrono;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <math.h>
 #include <cmath> 
 
@@ -317,8 +301,12 @@ int main(int argc, char* argv[]) {
   cv::Mat descriptors_query, descriptors_map;
 
   int minHessian = 400;
-  cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(minHessian);
+  //  cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(minHessian);
+  //cv::Ptr<cv::xfeatures2d::FREAK> detector = cv::xfeatures2d::FREAK::create();
+  //  cv::Ptr<cv::AKAZE> detector = cv::AKAZE::create();
+  cv::Ptr<cv::ORB> detector = cv::ORB::create();
 
+  
   detector->detectAndCompute(map_img_gray, 
 			     cv::noArray(), 
 			     keypoints_map,
@@ -353,7 +341,8 @@ int main(int argc, char* argv[]) {
 			      descriptors_query);
    
    
-   cv::FlannBasedMatcher matcher;
+   //   cv::FlannBasedMatcher matcher;
+   cv::BFMatcher matcher;
    
    std::vector< std::vector<cv::DMatch> > matches;
    
