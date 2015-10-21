@@ -43,6 +43,8 @@ using namespace std::chrono;
 #include "opencv2/highgui.hpp"
 
 const double pi = 3.14159265358979323846;
+
+using namespace std;
 using namespace cv;
 using namespace GeographicLib;
 
@@ -331,8 +333,6 @@ class Relocalizer {
                            homography);
 
   center_transformed = centers_transformed[0];
-  
-  std::cout << center_transformed.x << " " << center_transformed.y << std::endl;
 
   return center_transformed;
   
@@ -365,13 +365,16 @@ Relocalizer::Relocalizer(string path) {
 
 int main(int argc, char* argv[]) {
 
-  // Construct relocalizer with reference image
-  Relocalizer relocalizer("res.png");
+  // Construct relocalizer with reference image path
+  Relocalizer relocalizer("ref.png");
 
   // Read in query image
-  cv::Mat query_img = cv::imread("res.png");
+  cv::Mat query_img = cv::imread("query.png");
 
   // Get estimation (x, y) in pixels from relocalizer
-  cv::Point2f = relocalizer.calcLocation(query_img);
-  
+  cv::Point2f estimation = relocalizer.calcLocation(query_img);
+
+  // Print estimations
+  cout << estimation.x << " " << estimation.y << endl;
+
 }
