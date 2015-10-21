@@ -229,11 +229,6 @@ Point2d ecef_pos_to_pixel_pos(const cv::Point3d& pos) {
   
 }
 
-
-
-
-
-
 void debug_vector(std::vector<int> v) {
   for (int i = 0; i < v.size(); i++) {
     std::cout << i << ": " << v[i];
@@ -241,143 +236,80 @@ void debug_vector(std::vector<int> v) {
 }
 
 
-// Pixel coordinates to ECEF coordinates
+class Relocalizer {
 
-
-
-int main(int argc, char* argv[]) {
-
-  std::cout.precision(15);
-  //cv::Point2f p(5, 5);
-  //cv::Point2f p_2;
-
-  // p_2 = rotate_point(p, 35);
-
-  //  #std::cout << "x is: " << p_2.x << "y is: " << p_2.y;
-
-  // Init matrices for cam images and the map image
-  cv::Mat query_img, query_img_gray;
-  cv::Mat map_img, map_img_gray;
-
-  // Path of map  
-  std::string map_img_path = "../data/newMaze17_full.jpg";
-
-  // Path of drone information
-  std::string drone_info_path =  "../data/data_preprocessed.csv";
-  std::ifstream drone_info_file(drone_info_path.c_str());
-
-  // Homograpy
-  cv::Mat homography;
-
-  map_img = cv::imread(map_img_path, CV_LOAD_IMAGE_COLOR);
-  cv::cvtColor(map_img, map_img_gray, CV_BGR2GRAY);
-
-  // Check for invalid input
-  if (!map_img.data) {
-      std::cout << "Could not open or find the image" << std::endl;
-        return -1;
-    }
-
-  // Webcam usage or recorded video
-
-  std::string video_path = "../data/output.avi";
-  //int video_path = 1;
-
-  // Load camera
-  cv::VideoCapture video(video_path);
-
-  if (!video.isOpened()) {
-    std::cerr << "Capture not opened!" << std::endl;
-    return -1;
-  }
-
-  // Create a window for display.
-  //cv::namedWindow(query_window, cv::WINDOW_AUTOSIZE);
-  //cv::namedWindow(matches_window, cv::WINDOW_AUTOSIZE);
-
-  //-- Step 1: Detect the keypoints using SURF Detector
-  std::vector<cv::KeyPoint> keypoints_query, keypoints_map;
-
-  cv::Mat descriptors_query, descriptors_map;
-
-  int minHessian = 400;
-  //  cv::Ptr<cv::xfeatures2d::SURF> detector = cv::xfeatures2d::SURF::create(minHessian);
-  //cv::Ptr<cv::xfeatures2d::FREAK> detector = cv::xfeatures2d::FREAK::create();
-  //  cv::Ptr<cv::AKAZE> detector = cv::AKAZE::create();
-  cv::Ptr<cv::ORB> detector = cv::ORB::create();
-
-  
-  detector->detectAndCompute(map_img_gray, 
-			     cv::noArray(), 
-			     keypoints_map,
-			     descriptors_map);
-
-
-  high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  high_resolution_clock::time_point t2 = high_resolution_clock::now();
-  
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-  
-  // Read video frame by frame and do calculations
-  while (true) {
-
-    t1 = high_resolution_clock::now();
-    std::cout << (duration / 1000) << "\n";
-
-    // Read video, convert it to grayscale and display it 
-    video.read(query_img);
-    
-    cv::cvtColor(query_img, query_img_gray, cv::COLOR_BGR2GRAY);
-    //cv::imshow(query_window, query_img_gray);
-    
-    // Safely exit the recording on pressing any key
-    if(cv::waitKey(1) >= 0) break;
-   
-   // Calculate keypoints
-   
-   detector->detectAndCompute(query_img_gray, 
-			      cv::noArray(), 
-			      keypoints_query,
-			      descriptors_query);
-   
-   
-   //   cv::FlannBasedMatcher matcher;
-   cv::BFMatcher matcher;
-   
-   std::vector< std::vector<cv::DMatch> > matches;
-   
-   matcher.knnMatch(descriptors_query, 
-		    descriptors_map, 
-		    matches,
-		   2);
-   
-   std::vector<cv::KeyPoint> matched_query, matched_map, inliers_query, inliers_map;
+ private:
+  string ref_img_path; // Path of the reference image
+  cv::Mat ref_img; // Reference image as matrix
+  cv::Mat ref_img_c; // Reference image as matrix (color)
+  std::vector<cv::KeyPoint> kp_ref; // Keypoints of the ref image
+  cv::Mat des_ref; // Descriptors of the keypoints of the ref image
+  cv::Ptr<cv::xfeatures2d::SURF> detector;
+  cv::BFMatcher matcher;
+      
+   std::vector<cv::KeyPoint> matched_query, matched_map, inliers_query, inliers_ref;
    std::vector<cv::DMatch> good_matches;
 
-   //-- Localize the object
-   std::vector<cv::Point2f> pts_query;
-   std::vector<cv::Point2f> pts_map;
+ public:
+
+  Relocalizer(string ref_img_path);
+  cv::Point2f calcLocation(cv::Mat query_img) {
+
+    std::vector<cv::KeyPoint> kp_query; // Keypoints of the query image
+    cv::Mat des_query;
+    cv::Mat query_img_gray;
+    
+    cv::cvtColor(query_img,
+                 query_img_gray,
+                 cv::COLOR_BGR2GRAY);
+
+
+    detector->detectAndCompute(query_img_gray, 
+                               cv::noArray(), 
+                               kp_query,
+                               des_query);
+
+
+    std::vector< std::vector<cv::DMatch> > matches;
    
+    matcher.knnMatch(des_ref, 
+                     des_query, 
+                     matches,
+                     2);
+
+
+    std::vector<cv::KeyPoint> matched_query, matched_ref, inliers_query, inliers_ref;
+    std::vector<cv::DMatch> good_matches;
+
+   //-- Localize the object
+    std::vector<cv::Point2f> pts_query;
+    std::vector<cv::Point2f> pts_ref;
+    
   for(size_t i = 0; i < matches.size(); i++) {
     
     cv::DMatch first = matches[i][0];
     float dist_query = matches[i][0].distance;
-    float dist_map = matches[i][1].distance;
+    float dist_ref = matches[i][1].distance;
     
-    if(dist_query < match_ratio * dist_map) {
-      matched_query.push_back(keypoints_query[first.queryIdx]);
-      matched_map.push_back(keypoints_map[first.trainIdx]);
-
-      pts_query.push_back(keypoints_query[first.queryIdx].pt);
-      pts_map.push_back(keypoints_map[first.trainIdx].pt);
+    if (dist_query < match_ratio * dist_ref) {
+      
+      matched_query.push_back(kp_query[first.queryIdx]);
+      matched_ref.push_back(kp_ref[first.trainIdx]);
+      
+      pts_query.push_back(kp_query[first.queryIdx].pt);
+      pts_ref.push_back(kp_ref[first.trainIdx].pt);
       
     }
   }
 
+
   cv::Mat mask; 
 
+  // Homograpy
+  cv::Mat homography;
+  
   homography = cv::findHomography(pts_query, 
-				  pts_map,
+				  pts_ref,
 				  cv::RANSAC,
 				  5,
 				  mask);
@@ -385,69 +317,61 @@ int main(int argc, char* argv[]) {
 
   // Input Quadilateral or Image plane coordinates
   std::vector<cv::Point2f> centers(1), centers_transformed(1);
-  cv::Point2f center(query_img.rows / 2, query_img.cols / 2);
-  cv::Point2f center_transformed(query_img.rows / 2, query_img.cols / 2);
+
+  cv::Point2f center(query_img_gray.rows / 2,
+                     query_img_gray.cols / 2);
   
-  centers[0] = center;
-  cv::perspectiveTransform(centers, centers_transformed, homography);
+  cv::Point2f center_transformed(query_img.rows / 2,
+                                 query_img.cols / 2);
+  
+  centers[0] = center; // Workaround for using perspective transform
+  
+  cv::perspectiveTransform(centers,
+                           centers_transformed,
+                           homography);
 
   center_transformed = centers_transformed[0];
   
   std::cout << center_transformed.x << " " << center_transformed.y << std::endl;
 
-  cv::Point3d ecef = pixel_pos_to_ecef_pos(center_transformed);
-
-  std::cout << ecef << std::endl;
+  return center_transformed;
   
-  //debug_vector(centers);
-  //debug_vector(centers_transformed);
-
-  for(unsigned i = 0; i < matched_query.size(); i++) {
-
-    cv::Mat col = cv::Mat::ones(3, 1, CV_64F);
-    col.at<double>(0) = matched_query[i].pt.x;
-    col.at<double>(1) = matched_map[i].pt.y;
-    
-    col = homography * col;
-    col /= col.at<double>(2);
-    double dist = sqrt( pow(col.at<double>(0) - matched_map[i].pt.x, 2) +
-			pow(col.at<double>(1) - matched_map[i].pt.y, 2));
-    
-    if(dist < inlier_threshold) {
-      int new_i = static_cast<int>(inliers_query.size());
-      inliers_query.push_back(matched_query[i]);
-      inliers_map.push_back(matched_map[i]);
-      good_matches.push_back(cv::DMatch(new_i, new_i, 0));
-   }
   }
   
-  cv::Mat res, res_small;
-  //cv::drawMatches(query_img_gray, inliers_query, 
-		  // map_img_gray, inliers_map, 
-		  // good_matches, res);
+};
+
+
+Relocalizer::Relocalizer(string path) {
+
+  ref_img_path = path;
+  ref_img_c = cv::imread(ref_img_path);
+
+  cv::cvtColor(ref_img_c,
+               ref_img,
+               cv::COLOR_BGR2GRAY);
+
   
 
-  //cv::Size size(640, 480);//the dst image size,e.g.100x100
-  //cv::resize(res, res_small, size);
-  
-  //cv::imshow(matches_window, res_small);
-  
-  double inlier_ratio = inliers_query.size() * 1.0 / matched_query.size();
-  // std::cout << "Matching Results" << std::endl;
-  // std::cout << "*******************************" << std::endl;
-  // std::cout << "# Keypoints 1:                        \t" << keypoints_query.size() << std::endl;
-  // std::cout << "# Keypoints 2:                        \t" << keypoints_map.size() << std::endl;
-  // std::cout << "# Matches:                            \t" << matched_query.size() << std::endl;
-  // std::cout << "# Inliers:                            \t" << inliers_query.size() << std::endl;
-  // std::cout << "# Inliers Ratio:                      \t" << inlier_ratio << std::endl;
-  // std::cout << std::endl;
+  int minHessian = 400;
+  detector = cv::xfeatures2d::SURF::create(minHessian);
 
-  t2 = high_resolution_clock::now();
-  duration = std::chrono::duration_cast<std::chrono::microseconds>( t2 - t1 ).count();
-  std::cout << "Duration" << duration << std::endl;
-  
+
+  // Detect and compute keypoints of the reference image
+  detector->detectAndCompute(ref_img, 
+                             cv::noArray(), 
+                             kp_ref,
+                             des_ref);
 }
-  
-  return 0; 
+
+int main(int argc, char* argv[]) {
+
+  // Construct relocalizer with reference image
+  Relocalizer relocalizer("res.png");
+
+  // Read in query image
+  cv::Mat query_img = cv::imread("res.png");
+
+  // Get estimation (x, y) in pixels from relocalizer
+  cv::Point2f = relocalizer.calcLocation(query_img);
   
 }
