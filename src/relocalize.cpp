@@ -121,76 +121,102 @@ cv::Point2f Relocalizer::calcLocation(cv::Mat query_img) {
     cv::cvtColor(query_img,
                  query_img_gray,
                  cv::COLOR_BGR2GRAY);
+    cv::imshow("grayscale please",query_img_gray);
 
 
+    cout << "Before detect and compute "<<endl;
     detector->detectAndCompute(query_img_gray, 
                                cv::noArray(), 
                                kp_query,
                                des_query);
 
 
-    std::vector< std::vector<cv::DMatch> > matches;
-   
-    matcher.knnMatch(des_ref, 
-                     des_query, 
-                     matches,
-                     2);
+    std::vector<cv::DMatch> matches;
+
+    if(des_query.rows>0){
+        matcher.match(des_query, des_ref,
+                         matches);
+
+    cout << "Before after matcher "<<endl;
+
+        std::vector<cv::KeyPoint> matched_query, matched_ref, inliers_query, inliers_ref;
+        std::vector<cv::DMatch> good_matches;
+
+       //-- Localize the object
+        std::vector<cv::Point2f> pts_query;
+        std::vector<cv::Point2f> pts_ref;
+    cout << "Size matches: " << matches.size() << " and sizeof " << sizeof(matches) << endl;
+
+      for(cv::DMatch currentMatch : matches) {
+        //cout << " Size current Match: " << currentMatch.size() << endl;
+        cv::DMatch first = currentMatch;
+        //float dist_query = currentMatch[0].distance;
+        //float dist_ref = currentMatch[1].distance;
+
+        //cout << "dist query: " << dist_query << " Match ratio: " << match_ratio << " dist_ref: " << dist_ref << endl;
+
+        //if (dist_query < match_ratio * dist_ref) {
+
+        //       cout << "first query index: " << first.queryIdx << endl;
+        //       cout << "first train index: " << first.trainIdx << endl;
 
 
-    std::vector<cv::KeyPoint> matched_query, matched_ref, inliers_query, inliers_ref;
-    std::vector<cv::DMatch> good_matches;
+          matched_query.push_back(kp_query[first.queryIdx]);
+          matched_ref.push_back(kp_ref[first.trainIdx]);
 
-   //-- Localize the object
-    std::vector<cv::Point2f> pts_query;
-    std::vector<cv::Point2f> pts_ref;
-    
-  for(size_t i = 0; i < matches.size(); i++) {
-    
-    cv::DMatch first = matches[i][0];
-    float dist_query = matches[i][0].distance;
-    float dist_ref = matches[i][1].distance;
-    
-    if (dist_query < match_ratio * dist_ref) {
-      
-      matched_query.push_back(kp_query[first.queryIdx]);
-      matched_ref.push_back(kp_ref[first.trainIdx]);
-      
-      pts_query.push_back(kp_query[first.queryIdx].pt);
-      pts_ref.push_back(kp_ref[first.trainIdx].pt);
-      
+          pts_query.push_back(kp_query[first.queryIdx].pt);
+          pts_ref.push_back(kp_ref[first.trainIdx].pt);
+
+
+        }
+      //}
+        cout << "Size matched query: " << matched_query.size() << endl;
+
+      cv::Mat mask;
+        cout << "Before declaring the homography" << endl;
+         if(matched_query.size()>0){
+      // Homograpy
+      cv::Mat homography;
+
+      homography = cv::findHomography(pts_query,
+                      pts_ref,
+                      cv::RANSAC,
+                      5,
+                      mask);
+
+
+      // Input Quadilateral or Image plane coordinates
+      std::vector<cv::Point2f> centers(1), centers_transformed(1);
+
+      cv::Point2f center(query_img_gray.rows / 2,
+                         query_img_gray.cols / 2);
+
+      cv::Point2f center_transformed(query_img.rows / 2,
+                                     query_img.cols / 2);
+
+      centers[0] = center; // Workaround for using perspective transform
+      cout << "Centers: " << centers << " transformed: " << centers_transformed << " homography " << homography << endl;
+
+      if (homography.cols > 0) {
+
+          cv::perspectiveTransform(centers,
+                                   centers_transformed,
+                                   homography);
+
+          center_transformed = centers_transformed[0];
+
+            return center_transformed;\
+      }
+      else{
+          return Point2f(-1.0,-1.0);
+      }
+      }
+      else{
+          return Point2f(-1.0,-1.0);
+      }
     }
-  }
+    else{
+        return Point2f(-1.0,-1.0);
+    }
 
-
-  cv::Mat mask; 
-
-  // Homograpy
-  cv::Mat homography;
-  
-  homography = cv::findHomography(pts_query, 
-				  pts_ref,
-				  cv::RANSAC,
-				  5,
-				  mask);
-
-
-  // Input Quadilateral or Image plane coordinates
-  std::vector<cv::Point2f> centers(1), centers_transformed(1);
-
-  cv::Point2f center(query_img_gray.rows / 2,
-                     query_img_gray.cols / 2);
-  
-  cv::Point2f center_transformed(query_img.rows / 2,
-                                 query_img.cols / 2);
-  
-  centers[0] = center; // Workaround for using perspective transform
-  
-  cv::perspectiveTransform(centers,
-                           centers_transformed,
-                           homography);
-
-  center_transformed = centers_transformed[0];
-
-  return center_transformed;
-  
   }
