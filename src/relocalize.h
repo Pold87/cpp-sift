@@ -20,13 +20,14 @@ class Relocalizer {
   cv::Mat des_ref; // Descriptors of the keypoints of the ref image
   cv::Ptr<cv::xfeatures2d::SURF> detector; // Feature detector
   cv::BFMatcher matcher;
-      
+      double widthArenaMeters;
+      double heightArenaMeters;
    std::vector<cv::KeyPoint> matched_query, matched_map, inliers_query, inliers_ref;
    std::vector<cv::DMatch> good_matches;
 
  public:
 
-   Relocalizer(std::string ref_img_path);
+   Relocalizer(std::string ref_img_path,double widthMeter,double heightMeter);
    cv::Point2f calcLocation(cv::Mat query_img);
   
 };

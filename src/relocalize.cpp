@@ -89,8 +89,9 @@ Point2d pix2m_diff(const cv::Point2d& diff) {
 
 
 
-Relocalizer::Relocalizer(std::string path) {
-
+Relocalizer::Relocalizer(std::string path, double widthMeter, double heightMeter) {
+    widthArenaMeters = widthMeter;
+    heightArenaMeters = heightMeter;
   ref_img_path = path;
   ref_img_c = cv::imread(ref_img_path);
 
@@ -204,7 +205,8 @@ cv::Point2f Relocalizer::calcLocation(cv::Mat query_img) {
                                    homography);
 
           center_transformed = centers_transformed[0];
-
+          center_transformed.x = (center_transformed.x/ref_img.cols)*widthArenaMeters;
+          center_transformed.y = (center_transformed.y/ref_img.rows)*heightArenaMeters;
             return center_transformed;\
       }
       else{
