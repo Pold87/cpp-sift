@@ -122,7 +122,7 @@ cv::Point3f Relocalizer::calcLocation(cv::Mat query_img) {
     cv::cvtColor(query_img,
                  query_img_gray,
                  cv::COLOR_BGR2GRAY);
-    cv::imshow("grayscale please",query_img_gray);
+
 
 
     cout << "Before detect and compute "<<endl;
