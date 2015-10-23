@@ -28,7 +28,7 @@ class Relocalizer {
  public:
 
    Relocalizer(std::string ref_img_path,double widthMeter,double heightMeter);
-   cv::Point2f calcLocation(cv::Mat query_img);
+   cv::Point3f calcLocation(cv::Mat query_img);
   
 };
 

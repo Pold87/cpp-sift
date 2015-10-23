@@ -113,7 +113,7 @@ Relocalizer::Relocalizer(std::string path, double widthMeter, double heightMeter
 }
 
 
-cv::Point2f Relocalizer::calcLocation(cv::Mat query_img) {
+cv::Point3f Relocalizer::calcLocation(cv::Mat query_img) {
 
     std::vector<cv::KeyPoint> kp_query; // Keypoints of the query image
     cv::Mat des_query;
@@ -207,18 +207,36 @@ cv::Point2f Relocalizer::calcLocation(cv::Mat query_img) {
           center_transformed = centers_transformed[0];
           center_transformed.x = (center_transformed.x/ref_img.cols)*widthArenaMeters;
           center_transformed.y = (center_transformed.y/ref_img.rows)*heightArenaMeters;
-            return center_transformed;\
+
+            std::vector<Point2f> world_corners;
+            std::vector<Point2f> projected_corners;
+            world_corners.push_back(Point2f(1.0,0.0));
+            world_corners.push_back(Point2f(0.0,0.0));
+            world_corners.push_back(Point2f(0.0,0.1));
+            cv::perspectiveTransform(world_corners,projected_corners,homography);
+            float deltaX = projected_corners[1].x-projected_corners[0].x;
+            float deltaY = projected_corners[0].y-projected_corners[1].y;
+            float angle = atan2(deltaY,deltaX);
+            cout << " perspective transformed: " << projected_corners;
+            cout << endl << endl << "Angle " << angle << " deltaX: " << deltaX << " deltaY " << deltaY <<  endl << endl;
+/*
+            deltaY = projected_corners - y_orig;
+               deltaX = x_landmark - x_orig;
+               angle = angle_trunc(atan2(deltaY, deltaX));
+*/
+
+            return Point3f(center_transformed.x,center_transformed.y,angle);
       }
       else{
-          return Point2f(-1.0,-1.0);
+          return Point3f(-1.0,-1.0,0.0);
       }
       }
       else{
-          return Point2f(-1.0,-1.0);
+          return Point3f(-1.0,-1.0,0.0);
       }
     }
     else{
-        return Point2f(-1.0,-1.0);
+        return Point3f(-1.0,-1.0,0.0);
     }
 
   }
