@@ -16,11 +16,10 @@
 #include "opencv2/features2d.hpp"
 #include "opencv2/xfeatures2d.hpp"
 #include "opencv2/highgui.hpp"
-
+#include <opencv2/highgui/highgui.hpp>
 // Math libraries
 #include <math.h>
 #include <cmath>
-
 #include "relocalize.h"
 
 using namespace std;
@@ -90,6 +89,7 @@ Point2d pix2m_diff(const cv::Point2d& diff) {
 
 
 Relocalizer::Relocalizer(std::string path, double widthMeter, double heightMeter) {
+     logVideo = VideoWriter("outputRelocalizer.avi",CV_FOURCC('M','J','P','G'),30,cv::Size(320,240));
     widthArenaMeters = widthMeter;
     heightArenaMeters = heightMeter;
   ref_img_path = path;
@@ -114,7 +114,7 @@ Relocalizer::Relocalizer(std::string path, double widthMeter, double heightMeter
 
 
 cv::Point3f Relocalizer::calcLocation(cv::Mat query_img) {
-
+    logVideo.write(query_img);
     std::vector<cv::KeyPoint> kp_query; // Keypoints of the query image
     cv::Mat des_query;
     cv::Mat query_img_gray;
@@ -219,12 +219,6 @@ cv::Point3f Relocalizer::calcLocation(cv::Mat query_img) {
             float angle = atan2(deltaY,deltaX);
             cout << " perspective transformed: " << projected_corners;
             cout << endl << endl << "Angle " << angle << " deltaX: " << deltaX << " deltaY " << deltaY <<  endl << endl;
-/*
-            deltaY = projected_corners - y_orig;
-               deltaX = x_landmark - x_orig;
-               angle = angle_trunc(atan2(deltaY, deltaX));
-*/
-
             return Point3f(center_transformed.x,center_transformed.y,angle);
       }
       else{
