@@ -1,10 +1,17 @@
-estimate_kalman estimate_kalman.cpp:
-	g++ -g estimate_kalman.cpp -o estimate_kalman `pkg-config --cflags --libs opencv` -Wl,-rpath=/usr/local/lib -L/usr/local/lib -lGeographic -std=c++11
+CFLAGS = `pkg-config --cflags opencv`
+LIBS = `pkg-config --libs opencv`
+PYTHONCONFIG = /usr/include/python2.7/
 
+relocalize_example: relocalize_example.o relocalize.o
+	g++ relocalize_example.o relocalize.o -o relocalize_example $(CFLAGS) $(LIBS) -I $(PYTHONCONFIG) -I/usr/local/include/boost/python -lboost_python -lboost_system -std=c++11 -std=c++11
 
-#coordinates_transformations coordinates_transformations.cpp:
-#	g++ -g coordinates_transformations.cpp -o coordinates_transformations `pkg-config --cflags --libs opencv` -Wl,-rpath=/usr/local/lib -L/usr/local/lib -lGeographic
+relocalize_example.o: relocalize_example.cpp
+	g++ -c relocalize_example.cpp $(CFLAGS) $(LIBS) -I $(PYTHONCONFIG) -lboost_python -lboost_system -llibpython -std=c++11
+ -lboost_python32 -lboost_system -std=c++11
 
+relocalize.o: relocalize.cpp relocalize.h
+	g++ -c relocalize.cpp $(CFLAGS) $(LIBS) -I $(PYTHONCONFIG)  -lboost_python -lboost_system -llibpython -std=c++11
+ -lboost_python32 -lboost_system -std=c++11
 
-#test1 test1.cpp:
-#	g++ -g -o test1 test1.cpp -Wl,-rpath=/usr/local/lib -L/usr/local/lib -lGeographic
+clean:
+	rm *.o relocalize_example relocalize

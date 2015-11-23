@@ -194,3 +194,34 @@ cv::Point2f Relocalizer::calcLocation(cv::Mat query_img) {
   return center_transformed;
   
   }
+
+
+// Converts a C++ vector to a python list
+// from: https://gist.github.com/octavifs/5362272
+template <class T>
+boost::python::list toPythonList(std::vector<T> vector) {
+	typename std::vector<T>::iterator iter;
+	boost::python::list list;
+	for (iter = vector.begin(); iter != vector.end(); ++iter) {
+		list.append(*iter);
+	}
+	return list;
+}
+
+
+// Suited for calling from python
+boost::python::list Relocalizer::calcLocationFromPath(std::string query_img_path) {
+
+  // Read in query image
+  cv::Mat query_img = cv::imread(query_img_path);
+
+  cv::Point2f loc;
+  loc = calcLocation(query_img);
+
+  boost::python::list python_list;
+  python_list.append(loc.x);
+  python_list.append(loc.y);
+
+  return python_list;
+
+}
