@@ -1,7 +1,8 @@
+set(OpenCV_DIR "/home/pold87/opencv/build")
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 find_package(OpenCV REQUIRED core imgproc highgui calib3d videostab xfeatures2d features2d)
-
 
 
 cmake_minimum_required(VERSION 2.8.3)

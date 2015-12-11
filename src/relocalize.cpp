@@ -114,43 +114,36 @@ Relocalizer::Relocalizer(std::string path) {
 
 cv::Point2f Relocalizer::calcLocation(cv::Mat query_img) {
 
-    std::vector<cv::KeyPoint> kp_query; // Keypoints of the query image
-    cv::Mat des_query;
-    cv::Mat query_img_gray;
+  std::vector<cv::KeyPoint> kp_query; // Keypoints of the query image
+  cv::Mat des_query;
+  cv::Mat query_img_gray;
+  
+  cv::cvtColor(query_img,
+               query_img_gray,
+               cv::COLOR_BGR2GRAY);
+
+  
+  detector->detectAndCompute(query_img_gray, 
+                             cv::noArray(), 
+                             kp_query,
+                             des_query);
+  
+  
+  std::vector<cv::DMatch> matches;
+  
+  if(des_query.rows > 0){
+    matcher.match(des_query, des_ref,
+                  matches);
     
-    cv::cvtColor(query_img,
-                 query_img_gray,
-                 cv::COLOR_BGR2GRAY);
-
-
-    detector->detectAndCompute(query_img_gray, 
-                               cv::noArray(), 
-                               kp_query,
-                               des_query);
-
-
-    std::vector< std::vector<cv::DMatch> > matches;
-   
-    matcher.knnMatch(des_ref, 
-                     des_query, 
-                     matches,
-                     2);
-
-
     std::vector<cv::KeyPoint> matched_query, matched_ref, inliers_query, inliers_ref;
     std::vector<cv::DMatch> good_matches;
-
-   //-- Localize the object
+    
+    //-- Localize the object
     std::vector<cv::Point2f> pts_query;
     std::vector<cv::Point2f> pts_ref;
     
-  for(size_t i = 0; i < matches.size(); i++) {
-    
-    cv::DMatch first = matches[i][0];
-    float dist_query = matches[i][0].distance;
-    float dist_ref = matches[i][1].distance;
-    
-    if (dist_query < match_ratio * dist_ref) {
+    for(cv::DMatch currentMatch : matches) {
+      cv::DMatch first = currentMatch;
       
       matched_query.push_back(kp_query[first.queryIdx]);
       matched_ref.push_back(kp_ref[first.trainIdx]);
@@ -158,56 +151,55 @@ cv::Point2f Relocalizer::calcLocation(cv::Mat query_img) {
       pts_query.push_back(kp_query[first.queryIdx].pt);
       pts_ref.push_back(kp_ref[first.trainIdx].pt);
       
+      
+    }
+    
+    cv::Mat mask;
+    if(matched_query.size() > 0){
+      
+      // Homograpy
+      cv::Mat homography;
+      
+      homography = cv::findHomography(pts_query,
+                                      pts_ref,
+                                      cv::RANSAC,
+                                      5,
+                                      mask);
+      
+      
+      // Input Quadilateral or Image plane coordinates
+      std::vector<cv::Point2f> centers(1), centers_transformed(1);
+      
+      cv::Point2f center(query_img_gray.rows / 2,
+                         query_img_gray.cols / 2);
+      
+      cv::Point2f center_transformed(query_img.rows / 2,
+                                     query_img.cols / 2);
+      
+      centers[0] = center; // Workaround for using perspective transform
+      
+      if (homography.cols > 0) {
+        
+        cv::perspectiveTransform(centers,
+                                 centers_transformed,
+                                 homography);
+        
+        center_transformed = centers_transformed[0];
+        
+        return center_transformed;
+      }
+      else {
+        return Point2f(-1.0,-1.0);
+      }
+    }
+    else {
+      return Point2f(-1.0,-1.0);
     }
   }
-
-
-  cv::Mat mask; 
-
-  // Homograpy
-  cv::Mat homography;
-  
-  homography = cv::findHomography(pts_query, 
-				  pts_ref,
-				  cv::RANSAC,
-				  5,
-				  mask);
-
-
-  // Input Quadilateral or Image plane coordinates
-  std::vector<cv::Point2f> centers(1), centers_transformed(1);
-
-  cv::Point2f center(query_img_gray.rows / 2,
-                     query_img_gray.cols / 2);
-  
-  cv::Point2f center_transformed(query_img.rows / 2,
-                                 query_img.cols / 2);
-  
-  centers[0] = center; // Workaround for using perspective transform
-  
-  cv::perspectiveTransform(centers,
-                           centers_transformed,
-                           homography);
-
-  center_transformed = centers_transformed[0];
-
-  return center_transformed;
-  
+  else {
+    return Point2f(-1.0,-1.0);
   }
-
-
-// Converts a C++ vector to a python list
-// from: https://gist.github.com/octavifs/5362272
-template <class T>
-boost::python::list toPythonList(std::vector<T> vector) {
-	typename std::vector<T>::iterator iter;
-	boost::python::list list;
-	for (iter = vector.begin(); iter != vector.end(); ++iter) {
-		list.append(*iter);
-	}
-	return list;
 }
-
 
 // Suited for calling from python
 boost::python::list Relocalizer::calcLocationFromPath(std::string query_img_path) {

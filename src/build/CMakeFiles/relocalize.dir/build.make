@@ -34,11 +34,14 @@ RM = /usr/bin/cmake -E remove -f
 # Escaping for special characters.
 EQUALS = =
 
+# The program to use to edit the cache.
+CMAKE_EDIT_COMMAND = /usr/bin/cmake-gui
+
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pold/Documents/cpp-sift/src
+CMAKE_SOURCE_DIR = /home/pold87/Documents/Internship/cpp-sift/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pold/Documents/cpp-sift/src/build
+CMAKE_BINARY_DIR = /home/pold87/Documents/Internship/cpp-sift/src/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/relocalize.dir/depend.make
@@ -51,17 +54,17 @@ include CMakeFiles/relocalize.dir/flags.make
 
 CMakeFiles/relocalize.dir/relocalize.cpp.o: CMakeFiles/relocalize.dir/flags.make
 CMakeFiles/relocalize.dir/relocalize.cpp.o: ../relocalize.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/pold/Documents/cpp-sift/src/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/pold87/Documents/Internship/cpp-sift/src/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/relocalize.dir/relocalize.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/relocalize.dir/relocalize.cpp.o -c /home/pold/Documents/cpp-sift/src/relocalize.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/relocalize.dir/relocalize.cpp.o -c /home/pold87/Documents/Internship/cpp-sift/src/relocalize.cpp
 
 CMakeFiles/relocalize.dir/relocalize.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/relocalize.dir/relocalize.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pold/Documents/cpp-sift/src/relocalize.cpp > CMakeFiles/relocalize.dir/relocalize.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/pold87/Documents/Internship/cpp-sift/src/relocalize.cpp > CMakeFiles/relocalize.dir/relocalize.cpp.i
 
 CMakeFiles/relocalize.dir/relocalize.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/relocalize.dir/relocalize.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pold/Documents/cpp-sift/src/relocalize.cpp -o CMakeFiles/relocalize.dir/relocalize.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/pold87/Documents/Internship/cpp-sift/src/relocalize.cpp -o CMakeFiles/relocalize.dir/relocalize.cpp.s
 
 CMakeFiles/relocalize.dir/relocalize.cpp.o.requires:
 .PHONY : CMakeFiles/relocalize.dir/relocalize.cpp.o.requires
@@ -83,26 +86,26 @@ relocalize.so: CMakeFiles/relocalize.dir/relocalize.cpp.o
 relocalize.so: CMakeFiles/relocalize.dir/build.make
 relocalize.so: /usr/lib/i386-linux-gnu/libboost_python.so
 relocalize.so: /usr/lib/i386-linux-gnu/libpython2.7.so
-relocalize.so: /usr/local/lib/libopencv_core.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_imgproc.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_highgui.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_calib3d.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_videostab.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_xfeatures2d.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_features2d.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_photo.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_calib3d.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_features2d.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_highgui.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_flann.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_ml.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_videoio.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_imgcodecs.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_shape.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_video.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_imgproc.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_core.so.3.0.0
-relocalize.so: /usr/local/lib/libopencv_hal.a
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_core.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_imgproc.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_highgui.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_calib3d.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_videostab.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_xfeatures2d.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_features2d.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_photo.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_calib3d.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_features2d.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_highgui.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_flann.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_ml.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_videoio.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_imgcodecs.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_shape.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_video.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_imgproc.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_core.so.3.0.0
+relocalize.so: /home/pold87/opencv/build/lib/libopencv_hal.a
 relocalize.so: CMakeFiles/relocalize.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --red --bold "Linking CXX shared module relocalize.so"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/relocalize.dir/link.txt --verbose=$(VERBOSE)
@@ -119,6 +122,6 @@ CMakeFiles/relocalize.dir/clean:
 .PHONY : CMakeFiles/relocalize.dir/clean
 
 CMakeFiles/relocalize.dir/depend:
-	cd /home/pold/Documents/cpp-sift/src/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/pold/Documents/cpp-sift/src /home/pold/Documents/cpp-sift/src /home/pold/Documents/cpp-sift/src/build /home/pold/Documents/cpp-sift/src/build /home/pold/Documents/cpp-sift/src/build/CMakeFiles/relocalize.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/pold87/Documents/Internship/cpp-sift/src/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/pold87/Documents/Internship/cpp-sift/src /home/pold87/Documents/Internship/cpp-sift/src /home/pold87/Documents/Internship/cpp-sift/src/build /home/pold87/Documents/Internship/cpp-sift/src/build /home/pold87/Documents/Internship/cpp-sift/src/build/CMakeFiles/relocalize.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/relocalize.dir/depend
 

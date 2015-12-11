@@ -46,11 +46,14 @@ RM = /usr/bin/cmake -E remove -f
 # Escaping for special characters.
 EQUALS = =
 
+# The program to use to edit the cache.
+CMAKE_EDIT_COMMAND = /usr/bin/cmake-gui
+
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pold/Documents/cpp-sift/src
+CMAKE_SOURCE_DIR = /home/pold87/Documents/Internship/cpp-sift/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pold/Documents/cpp-sift/src/build
+CMAKE_BINARY_DIR = /home/pold87/Documents/Internship/cpp-sift/src/build
 
 #=============================================================================
 # Target rules for target CMakeFiles/relocalize.dir
@@ -59,7 +62,7 @@ CMAKE_BINARY_DIR = /home/pold/Documents/cpp-sift/src/build
 CMakeFiles/relocalize.dir/all:
 	$(MAKE) -f CMakeFiles/relocalize.dir/build.make CMakeFiles/relocalize.dir/depend
 	$(MAKE) -f CMakeFiles/relocalize.dir/build.make CMakeFiles/relocalize.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/pold/Documents/cpp-sift/src/build/CMakeFiles  1
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/pold87/Documents/Internship/cpp-sift/src/build/CMakeFiles  1
 	@echo "Built target relocalize"
 .PHONY : CMakeFiles/relocalize.dir/all
 
@@ -69,9 +72,9 @@ all: CMakeFiles/relocalize.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/relocalize.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pold/Documents/cpp-sift/src/build/CMakeFiles 1
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pold87/Documents/Internship/cpp-sift/src/build/CMakeFiles 1
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/relocalize.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pold/Documents/cpp-sift/src/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pold87/Documents/Internship/cpp-sift/src/build/CMakeFiles 0
 .PHONY : CMakeFiles/relocalize.dir/rule
 
 # Convenience name for target.
