@@ -9,7 +9,7 @@
 #include "opencv2/features2d.hpp"
 #include "opencv2/xfeatures2d.hpp"
 #include "opencv2/highgui.hpp"
-#include <boost/python.hpp>
+#include <boost/pyton.hpp>
 
 
 class Relocalizer {
@@ -28,7 +28,7 @@ class Relocalizer {
  public:
 
    Relocalizer(std::string ref_img_path);
-   cv::Point2f calcLocation(cv::Mat query_img);
+   std::vector<float> calcLocation(cv::Mat query_img);
    boost::python::list calcLocationFromPath(std::string query_img_path);
   
 };

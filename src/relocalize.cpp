@@ -112,8 +112,16 @@ Relocalizer::Relocalizer(std::string path) {
 }
 
 
-cv::Point2f Relocalizer::calcLocation(cv::Mat query_img) {
+std::vector<float> Relocalizer::calcLocation(cv::Mat query_img) {
 
+  std::vector<float> res(3);
+  std::vector<float> resDefault(3);
+
+  resDefault[0] = -1.0;
+  resDefault[1] = -1.0;
+  resDefault[2] =  0.0;
+
+  
   std::vector<cv::KeyPoint> kp_query; // Keypoints of the query image
   cv::Mat des_query;
   cv::Mat query_img_gray;
@@ -185,21 +193,27 @@ cv::Point2f Relocalizer::calcLocation(cv::Mat query_img) {
                                  homography);
         
         center_transformed = centers_transformed[0];
+
+        res[0] = center_transformed.x;
+        res[1] = center_transformed.y;
+        res[2] = matches.size();
         
-        return center_transformed;
+        return res;
       }
       else {
-        return Point2f(-1.0,-1.0);
+        return resDefault;
       }
     }
     else {
-      return Point2f(-1.0,-1.0);
+      return resDefault;
     }
   }
   else {
-    return Point2f(-1.0,-1.0);
+    return resDefault;
   }
 }
+
+
 
 // Suited for calling from python
 boost::python::list Relocalizer::calcLocationFromPath(std::string query_img_path) {
@@ -207,13 +221,16 @@ boost::python::list Relocalizer::calcLocationFromPath(std::string query_img_path
   // Read in query image
   cv::Mat query_img = cv::imread(query_img_path);
 
-  cv::Point2f loc;
+  std::vector<float> loc(3);
   loc = calcLocation(query_img);
-
+  
   boost::python::list python_list;
-  python_list.append(loc.x);
-  python_list.append(loc.y);
 
+  // Transform vector to Python list
+  for (int i = 0; i < loc.size(); i++){
+    python_list.append(loc[i]);    
+  }
+  
   return python_list;
 
 }
